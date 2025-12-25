@@ -1,0 +1,97 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: minecraft-postgres
+    environment:
+      POSTGRES_DB: minecraft_db
+      POSTGRES_USER: minecraft_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me_in_production}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"  # External port 5433, internal 5432 (to avoid conflict with local PostgreSQL)
+    restart: unless-stopped
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U minecraft_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Minecraft Server
+  minecraft:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: minecraft-server
+    ports:
+      - "25565:25565"
+    volumes:
+      # Use your existing server folder
+      - ~/mc-dev/server:/minecraft
+    environment:
+      - MEMORY=2G
+      - POSTGRES_HOST=postgres
+      - POSTGRES_DB=minecraft_db
+      - POSTGRES_USER=minecraft_user
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-change_me_in_production}
+    restart: unless-stopped
+    tty: true
+    stdin_open: true
+    networks:
+      - app-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # FastAPI Backend
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: fastapi-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_DB=minecraft_db
+      - POSTGRES_USER=minecraft_user
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-change_me_in_production}
+      - DATABASE_URL=postgresql://minecraft_user:${POSTGRES_PASSWORD:-change_me_in_production}@postgres:5432/minecraft_db
+    volumes:
+      - ./api:/app
+    restart: unless-stopped
+    networks:
+      - app-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # Next.js Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: nextjs-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    restart: unless-stopped
+    networks:
+      - app-network
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:
+
+networks:
+  app-network:
+    driver: bridge

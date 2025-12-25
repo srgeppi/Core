@@ -1,0 +1,10 @@
+name: HelloPlugin
+main: com.srgeppi.main.Main
+version: ${version}
+api-version: '1.21'
+author: srgeppi
+description: A simple plugin with a ping command
+commands:
+  ping:
+    description: Check your ping
+    usage: /ping

@@ -1,0 +1,14 @@
+.gradle/
+build/
+!build/libs/
+.gradle
+.idea/
+*.iml
+*.ipr
+*.iws
+.DS_Store
+server-data/
+*.log
+.env
+node_modules/
+.next/
