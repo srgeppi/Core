@@ -6,6 +6,8 @@ Complete containerized setup with:
 - 🐍 FastAPI Backend
 - ⚛️ Next.js Frontend
 
+sdasda readme
+
 ## Quick Start
 
 1. **Copy environment file:**
