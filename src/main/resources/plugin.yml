@@ -3,8 +3,14 @@ main: com.srgeppi.main.Main
 version: ${version}
 api-version: '1.21'
 author: srgeppi
-description: A simple plugin with a ping command
+description: Minecraft plugin with database integration
 commands:
   ping:
     description: Check your ping
     usage: /ping
+  info:
+    description: View your player information
+    usage: /info
+  connect:
+    description: Link your Minecraft account to website account
+    usage: /connect <token>

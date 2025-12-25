@@ -13,6 +13,9 @@ repositories {
 dependencies {
     // Paper API for 1.21.x
     compileOnly("io.papermc.paper:paper-api:1.21.1-R0.1-SNAPSHOT")
+    
+    // PostgreSQL JDBC Driver
+    implementation("org.postgresql:postgresql:42.7.1")
 }
 
 java {
